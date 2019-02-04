@@ -10,15 +10,16 @@ namespace DemoRestService.DbConnections
 {
     public class DbConnector
     {
+
+        public static string server = "address";
+        static string database = "testdb";
+        static string user = "name";
+        static string password = "password";
+        static string port = "3306";
+        static string sslM = "none";
+
         public static bool AddTowerToDB(Tower tower)
         {
-
-            var server = "server ip here";
-            var database = "testdb";
-            var user = "username here";
-            var password = "password here";
-            var port = "3306";
-            var sslM = "none";
             var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
             var query = "INSERT INTO towers (id, municipal, towername, longitudecoord, latitudecoord) VALUES('@id', '@municipal', '@towername', '@longitudecoord', '@latitudecoord')";
             
@@ -47,21 +48,16 @@ namespace DemoRestService.DbConnections
 
         public static DataTable GetTowersFromDB(string municipal)
         {
-            var server = "server ip here";
-            var database = "testdb";
-            var user = "username here";
-            var password = "password here";
-            var port = "3306";
-            var sslM = "none";
+            
             var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
             var query = "";
             if(municipal == null)
             {
-                query = "SELECT * FROM testdb.towers";
+                query = "SELECT * FROM testdb.towers ORDER BY municipal ASC";
             }
             else
             {
-                query = "SELECT * FROM testdb.towers WHERE municipal = '@municipal'";
+                query = "SELECT * FROM testdb.towers WHERE municipal = '@municipal' ORDER BY  municipal ASC";
                 query = query.Replace("@municipal", municipal);
             }
 
@@ -80,6 +76,40 @@ namespace DemoRestService.DbConnections
                 connection.Close();
                 return dt;
                 
+            }
+            catch (Exception)
+            {
+                //throw
+                return null;
+            }
+        }
+
+
+        public static DataTable GetSpeciesFromDB()
+        {
+            
+            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
+            var query = "";
+           
+            query = "SELECT * FROM testdb.species ORDER BY speciename ASC";
+            
+            
+
+            List<String> species = new List<String>();
+            MySqlConnection connection = new MySqlConnection(connectionString);
+            MySqlCommand command = new MySqlCommand(query, connection);
+
+            try
+            {
+                var dt = new DataTable();
+
+                connection.Open();
+                MySqlDataAdapter da = new MySqlDataAdapter(command);
+                da.Fill(dt);
+                command.Dispose();
+                connection.Close();
+                return dt;
+
             }
             catch (Exception)
             {

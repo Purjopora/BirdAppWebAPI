@@ -47,8 +47,9 @@ namespace DemoRestService.Controllers
                     id = row["id"].ToString(),
                     municipal = row["municipal"].ToString(),
                     towername = row["towername"].ToString(),
-                    latitudecoord = row["latitudecoord"].ToString(),
-                    longitudecoord = row["longitudecoord"].ToString()
+                    latitudecoord = row["latitudecoord"].ToString().Replace(",","."),
+                    
+                    longitudecoord = row["longitudecoord"].ToString().Replace(",", ".")
                 };
                 TowerList.Add(tower);
             }
@@ -73,8 +74,8 @@ namespace DemoRestService.Controllers
                     id = row["id"].ToString(),
                     municipal = row["municipal"].ToString(),
                     towername = row["towername"].ToString(),
-                    latitudecoord = row["latitudecoord"].ToString(),
-                    longitudecoord = row["longitudecoord"].ToString()
+                    latitudecoord = row["latitudecoord"].ToString().Replace(",", "."),
+                    longitudecoord = row["longitudecoord"].ToString().Replace(",", ".")
                 };
                 TowerList.Add(tower);
             }
@@ -82,6 +83,31 @@ namespace DemoRestService.Controllers
         }
 
 
+        [HttpGet]
+        [Route("api/GetSpecies")]
+        public IEnumerable<Specie> GetSpecies()
+        {
+            DataTable resultdt = DbConnector.GetSpeciesFromDB();
+            if (resultdt == null)
+            {
+                return null;
+            }
+            var SpecieList = new List<Specie>();
+            foreach (DataRow row in resultdt.Rows)
+            {
+                var specie = new Specie
+                {
+                    id = row["id"].ToString(),
+                    speciename = row["speciename"].ToString()
+                };
+                SpecieList.Add(specie);
+            }
+            return SpecieList;
+        }
+
+
 
     }
+
+ 
 }

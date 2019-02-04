@@ -277,6 +277,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\BirdSighting.cs" />
+    <Compile Include="Models\Specie.cs" />
     <Compile Include="Models\Tower.cs" />
     <Compile Include="Processors\TowerProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
