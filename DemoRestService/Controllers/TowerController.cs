@@ -81,32 +81,6 @@ namespace DemoRestService.Controllers
             }
             return TowerList;
         }
-
-
-        [HttpGet]
-        [Route("api/GetSpecies")]
-        public IEnumerable<Specie> GetSpecies()
-        {
-            DataTable resultdt = DbConnector.GetSpeciesFromDB();
-            if (resultdt == null)
-            {
-                return null;
-            }
-            var SpecieList = new List<Specie>();
-            foreach (DataRow row in resultdt.Rows)
-            {
-                var specie = new Specie
-                {
-                    id = row["id"].ToString(),
-                    speciename = row["speciename"].ToString()
-                };
-                SpecieList.Add(specie);
-            }
-            return SpecieList;
-        }
-
-
-
     }
 
  
