@@ -273,6 +273,7 @@
     <Compile Include="Controllers\BirdSpeciesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\TowerController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="DbConnections\DbConnector.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -280,7 +281,9 @@
     <Compile Include="Models\BirdSighting.cs" />
     <Compile Include="Models\Specie.cs" />
     <Compile Include="Models\Tower.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Processors\TowerProcessor.cs" />
+    <Compile Include="Processors\UserProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

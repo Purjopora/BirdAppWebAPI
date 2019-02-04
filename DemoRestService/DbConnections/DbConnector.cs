@@ -11,10 +11,10 @@ namespace DemoRestService.DbConnections
     public class DbConnector
     {
 
-        public static string server = "address";
-        static string database = "testdb";
-        static string user = "name";
-        static string password = "password";
+        public static string server = "";
+        static string database = "";
+        static string user = "";
+        static string password = "";
         static string port = "3306";
         static string sslM = "none";
 
@@ -115,6 +115,70 @@ namespace DemoRestService.DbConnections
             {
                 //throw
                 return null;
+            }
+        }
+
+
+        //---------------------------------------------------------------
+        //ACCOUNT MANAGEMENT STUFF BELOW
+
+        public static DataTable GetUserFromDB(string username)
+        {
+
+            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
+            var query = "";
+
+            query = "SELECT * FROM testdb.users WHERE username = '@username'";
+            query = query.Replace("@username", username);
+
+
+
+            List<String> species = new List<String>();
+            MySqlConnection connection = new MySqlConnection(connectionString);
+            MySqlCommand command = new MySqlCommand(query, connection);
+
+            try
+            {
+                var dt = new DataTable();
+
+                connection.Open();
+                MySqlDataAdapter da = new MySqlDataAdapter(command);
+                da.Fill(dt);
+                command.Dispose();
+                connection.Close();
+                return dt;
+
+            }
+            catch (Exception)
+            {
+                //throw
+                return null;
+            }
+        }
+
+        public static bool AddUserToDB(User usercredentials)
+        {
+            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
+            var query = "INSERT INTO users (username, password) VALUES('@username', '@password')";
+
+            query = query.Replace("@username", usercredentials.username)
+                .Replace("@password", usercredentials.password);
+                
+
+            MySqlConnection connection = new MySqlConnection(connectionString);
+            try
+            {
+                connection.Open();
+                MySqlCommand command = new MySqlCommand(query, connection);
+                command.ExecuteNonQuery();
+                command.Dispose();
+                connection.Close();
+                return true;
+            }
+            catch (Exception)
+            {
+                //throw
+                return false;
             }
         }
 
