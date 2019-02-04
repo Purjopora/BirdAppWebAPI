@@ -12,6 +12,8 @@ namespace DemoRestService.Processors
         public static bool ProcessUser(User user)
         {
             //maybe later encrypt credentials here
+
+            user.passwordhash = PasswordHash.CreateHash(user.passwordhash);
             return DbConnector.AddUserToDB(user);
         }
     }

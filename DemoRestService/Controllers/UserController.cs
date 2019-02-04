@@ -13,28 +13,24 @@ namespace DemoRestService.Controllers
     public class UserController : ApiController
     {
         [HttpGet]
-        [Route("api/GetUser")]
-        public User GetUser(string username)
+        [Route("api/VerifyUser")]
+        public bool VerifyUser(string username, string password)
         {
             DataTable resultdt = DbConnector.GetUserFromDB(username);
             if (resultdt == null)
             {
-                return null;
+                return false;
             }
             DataRow row = resultdt.Rows[0];
-            var user = new User
-                {
-                    username = row["username"].ToString(),
-                    password = row["password"].ToString()
-                };
-            return user;
-            
-            
+            var parts = row["passwordhash"].ToString();
+            return PasswordHash.VerifyPassword(password, parts);       
         }
+
+
         //POST NEW User
         [HttpPost]
         [Route("api/SaveUser")]
-        public bool SaveTower(User user)
+        public bool SaveUser(User user)
         {
             if (user == null)
             {
