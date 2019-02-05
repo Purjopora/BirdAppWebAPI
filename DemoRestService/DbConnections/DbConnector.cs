@@ -12,6 +12,7 @@ namespace DemoRestService.DbConnections
     public class DbConnector
     {
 
+ 
         public static string server = "";
         static string database = "";
         static string user = "";
@@ -160,11 +161,61 @@ namespace DemoRestService.DbConnections
         public static bool AddUserToDB(User usercredentials)
         {
             var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
-            var query = "INSERT INTO users (username, passwordhash) VALUES('@username', '@password')";
+            //var query = "INSERT INTO users (username, passwordhash) VALUES('@username', '@password')";
 
-            query = query.Replace("@username", usercredentials.username)
-                .Replace("@password", usercredentials.passwordhash);
+
                 
+            //ADD user to users-table
+            try
+            {
+                var query = "INSERT INTO users (username, passwordhash) VALUES('@username', '@password')";
+                query = query.Replace("@username", usercredentials.username)
+                    .Replace("@password", usercredentials.passwordhash);
+                MySqlConnection connection = new MySqlConnection(connectionString);
+                connection.Open();
+                MySqlCommand command = new MySqlCommand(query, connection);
+                command.ExecuteNonQuery();
+                command.Dispose();
+                connection.Close();
+                
+            }
+            catch (Exception)
+            {
+                //throw
+                return false;
+            }
+            //ADD user to sightings-table
+            try
+            {
+                var query = "INSERT INTO sightings (user, sightinglist) VALUES('@username', '')";
+                query = query.Replace("@username", usercredentials.username);
+                MySqlConnection connection = new MySqlConnection(connectionString);
+                connection.Open();
+                MySqlCommand command = new MySqlCommand(query, connection);
+                command.ExecuteNonQuery();
+                command.Dispose();
+                connection.Close();
+                return true;
+
+            }
+            catch (Exception)
+            {
+                //throw
+                return false;
+            }
+
+
+        }
+
+        //---------------------------------------------
+        //ADD NEW SIGHTINGS TO DB
+
+        public static bool UpdateSightingsToDB(string username, string sightings)
+        {
+            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
+            var query = "UPDATE sightings SET sightinglist = '@sightings' WHERE user = '@user'";
+            query = query.Replace("@sightings", sightings)
+                .Replace("@user", username);
 
             MySqlConnection connection = new MySqlConnection(connectionString);
             try
@@ -182,6 +233,43 @@ namespace DemoRestService.DbConnections
                 return false;
             }
         }
+
+
+
+
+        public static DataTable GetSightingsFromDB(string username)
+        {
+
+            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
+            var query = "SELECT * FROM testdb.sightings WHERE user = '@user'";
+
+            query = query.Replace("@user", username);
+
+
+
+            List<String> species = new List<String>();
+            MySqlConnection connection = new MySqlConnection(connectionString);
+            MySqlCommand command = new MySqlCommand(query, connection);
+
+            try
+            {
+                var dt = new DataTable();
+
+                connection.Open();
+                MySqlDataAdapter da = new MySqlDataAdapter(command);
+                da.Fill(dt);
+                command.Dispose();
+                connection.Close();
+                return dt;
+
+            }
+            catch (Exception)
+            {
+                //throw
+                return null;
+            }
+        }
+
 
 
     }

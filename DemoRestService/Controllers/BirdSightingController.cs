@@ -1,6 +1,8 @@
-﻿using DemoRestService.Models;
+﻿using DemoRestService.DbConnections;
+using DemoRestService.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,39 +12,37 @@ namespace DemoRestService.Controllers
 {
     public class BirdSightingController : ApiController
     {
-        // GET: api/Bird
-        public IEnumerable<BirdSighting> Get()
+        //POST NEW Sighting
+        [HttpPost]
+        [Route("api/SaveSighting")]
+        public bool SaveSighting(string user, string sightings)
         {
-            var BirdSightingList = new List<BirdSighting>();
-            for(int i  = 0; i < 10; i++)
+
+            return DbConnector.UpdateSightingsToDB(user, sightings);
+
+        }
+
+
+        //GET Sightings
+        [HttpGet]
+        [Route("api/GetSightings")]
+        public string  GetSightings(string user)
+        {
+
+            DataTable resultdt = DbConnector.GetSightingsFromDB(user);
+            if (resultdt == null)
             {
-                var BirdSighting = new BirdSighting
-                {
-                    Location = $"Location {i}",
-                    Specie = "kondorikotka",
-                    Amount = i * 3,
-                    DateTime = DateTime.Now.ToUniversalTime()
-
-
-
-                };
-                BirdSightingList.Add(BirdSighting);
+                return null;
             }
-            return BirdSightingList;
+
+            DataRow row = resultdt.Rows[0];
+            return row["sightinglist"].ToString();
+
         }
 
-        // GET: api/Bird/5
-        public BirdSighting Get(int id)
-        {
-            return new BirdSighting
-            {
-                Location = $"Location {id}",
-                Specie = "Specie",
-                Amount = 3,
-                DateTime = DateTime.Now.ToUniversalTime()
-            };
-        }
 
-        
+
+
+
     }
 }
