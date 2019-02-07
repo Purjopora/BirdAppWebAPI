@@ -64,7 +64,7 @@ namespace DemoRestService.Controllers
         {
             //TODO: Only needs to fetch coordinates from database?
             IEnumerable<Tower> Towers = GetTowers();
-            double[][] clusters = KekMeansLocationProviderAdapter.Cluster(Towers.ToList<LocationProvider>(), KekMeansLocationProviderAdapter.DEFAULT_CLUSTER_AMOUNT);
+            double[][] clusters = KekMeansLocationProviderAdapter.ClusterPartitions(Towers.ToList<LocationProvider>(), KekMeansLocationProviderAdapter.DEFAULT_CLUSTER_AMOUNT);
 
             var ResultList = new List<Tower>();
             for (int i = 0; i < clusters.Length; i++)
