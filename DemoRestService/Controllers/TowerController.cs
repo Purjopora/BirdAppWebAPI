@@ -8,6 +8,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using DemoRestService.Algorithms;
+using DemoRestService.Common;
 
 namespace DemoRestService.Controllers
 {
@@ -54,6 +56,30 @@ namespace DemoRestService.Controllers
                 TowerList.Add(tower);
             }
             return TowerList;
+        }
+
+        [HttpGet]
+        [Route("api/GetTowers/clustered")]
+        public IEnumerable<Tower> getTowersClustered()
+        {
+            //TODO: Only needs to fetch coordinates from database?
+            IEnumerable<Tower> Towers = GetTowers();
+            double[][] clusters = KekMeansLocationProviderAdapter.Cluster(Towers.ToList<LocationProvider>(), KekMeansLocationProviderAdapter.DEFAULT_CLUSTER_AMOUNT);
+
+            var ResultList = new List<Tower>();
+            for (int i = 0; i < clusters.Length; i++)
+            {
+                Tower cluster = new Tower
+                {
+                    id = i.ToString(),
+                    municipal = "testipesti",
+                    towername = "Cluster" + i.ToString(),
+                    latitudecoord = clusters[i][0].ToString(),
+                    longitudecoord = clusters[i][1].ToString()
+                };
+                ResultList.Add(cluster);
+            }
+            return ResultList;
         }
 
 
