@@ -236,6 +236,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\KekMeans.cs" />
+    <Compile Include="Algorithms\KekMeansLocationProviderAdapter.cs" />
+    <Compile Include="Common\LocationProvider.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
