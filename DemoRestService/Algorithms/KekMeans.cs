@@ -7,7 +7,7 @@ namespace DemoRestService.Algorithms
 {
     class KekMeans
     {
-        private static readonly int MAX_ITERATIONS = 100;
+        private static readonly int MAX_ITERATIONS = 200;
 
         /// <summary>
         /// Clusters the data into a predefined amount of clusters and returns the means as an array.
