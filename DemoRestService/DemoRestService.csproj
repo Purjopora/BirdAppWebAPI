@@ -285,6 +285,7 @@
     <Compile Include="Models\Specie.cs" />
     <Compile Include="Models\Tower.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Processors\BirdSightingProcessor.cs" />
     <Compile Include="Processors\PasswordHash.cs" />
     <Compile Include="Processors\TowerProcessor.cs" />
     <Compile Include="Processors\UserProcessor.cs" />

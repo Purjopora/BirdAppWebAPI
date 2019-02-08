@@ -15,10 +15,11 @@ namespace DemoRestService.Controllers
         //POST NEW Sighting
         [HttpPost]
         [Route("api/SaveSighting")]
-        public bool SaveSighting(string user, string sightings)
+        public bool SaveSighting(BirdSighting birdsighting)
         {
+            
 
-            return DbConnector.UpdateSightingsToDB(user, sightings);
+            return DbConnector.UpdateSightingsToDB(birdsighting);
 
         }
 
@@ -26,7 +27,7 @@ namespace DemoRestService.Controllers
         //GET Sightings
         [HttpGet]
         [Route("api/GetSightings")]
-        public string  GetSightings(string user)
+        public IEnumerable<BirdSighting> GetSightingsFromUser(string user)
         {
 
             DataTable resultdt = DbConnector.GetSightingsFromDB(user);
@@ -35,8 +36,23 @@ namespace DemoRestService.Controllers
                 return null;
             }
 
-            DataRow row = resultdt.Rows[0];
-            return row["sightinglist"].ToString();
+            var SightingList = new List<BirdSighting>();
+            foreach (DataRow row in resultdt.Rows)
+            {
+
+                var sighting = new BirdSighting
+                {
+                    username = row["username"].ToString(),
+                    specie = row["specie"].ToString(),
+                    longitudecoord = Convert.ToDouble(row["longitudecoord"]),
+                    latitudecoord = Convert.ToDouble(row["latitudecoord"]),
+                    comment = row["comment"].ToString(),
+                    timestamp = Convert.ToDateTime(row["timestamp"])
+
+                };
+                SightingList.Add(sighting);
+            }
+            return SightingList;
 
         }
 

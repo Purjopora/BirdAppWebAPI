@@ -13,10 +13,10 @@ namespace DemoRestService.DbConnections
     {
 
  
-        public static string server = "";
-        static string database = "";
-        static string user = "";
-        static string password = "";
+        public static string server = "mytestdb.c98qcb3crjgp.us-east-2.rds.amazonaws.com";
+        static string database = "testdb";
+        static string user = "Juupperi";
+        static string password = "12344321";
         static string port = "3306";
         static string sslM = "none";
 
@@ -177,6 +177,7 @@ namespace DemoRestService.DbConnections
                 command.ExecuteNonQuery();
                 command.Dispose();
                 connection.Close();
+                return true;
                 
             }
             catch (Exception)
@@ -184,25 +185,7 @@ namespace DemoRestService.DbConnections
                 //throw
                 return false;
             }
-            //ADD user to sightings-table
-            try
-            {
-                var query = "INSERT INTO sightings (user, sightinglist) VALUES('@username', '')";
-                query = query.Replace("@username", usercredentials.username);
-                MySqlConnection connection = new MySqlConnection(connectionString);
-                connection.Open();
-                MySqlCommand command = new MySqlCommand(query, connection);
-                command.ExecuteNonQuery();
-                command.Dispose();
-                connection.Close();
-                return true;
-
-            }
-            catch (Exception)
-            {
-                //throw
-                return false;
-            }
+            
 
 
         }
@@ -210,18 +193,31 @@ namespace DemoRestService.DbConnections
         //---------------------------------------------
         //ADD NEW SIGHTINGS TO DB
 
-        public static bool UpdateSightingsToDB(string username, string sightings)
+        public static bool UpdateSightingsToDB(BirdSighting sighting)
         {
             var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
-            var query = "UPDATE sightings SET sightinglist = '@sightings' WHERE user = '@user'";
-            query = query.Replace("@sightings", sightings)
-                .Replace("@user", username);
+            var query = "INSERT INTO sightings (username, specie, longitudecoord, latitudecoord, comment, timestamp)" +
+                " VALUES('@username', '@specie', @longitudecoord, @latitudecoord,'@comment',@timestamp)";
+            query = query.Replace("@username", sighting.username)
+
+                //ADD empty comment if none provided
+
+
+                .Replace("@specie", sighting.specie)
+                //.Replace("@longitudecoord", sighting.longitudecoord)
+                //.Replace("@latitudecoord", sighting.latitudecoord)
+                .Replace("@comment", sighting.comment);
+                //.Replace("@timestamp", sighting.timestamp.ToString());
 
             MySqlConnection connection = new MySqlConnection(connectionString);
             try
             {
                 connection.Open();
                 MySqlCommand command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@timestamp", sighting.timestamp);
+                command.Parameters.AddWithValue("@longitudecoord", sighting.longitudecoord);
+                command.Parameters.AddWithValue("@latitudecoord", sighting.latitudecoord);
+
                 command.ExecuteNonQuery();
                 command.Dispose();
                 connection.Close();
@@ -241,7 +237,7 @@ namespace DemoRestService.DbConnections
         {
 
             var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
-            var query = "SELECT * FROM testdb.sightings WHERE user = '@user'";
+            var query = "SELECT * FROM testdb.sightings WHERE username = '@user'";
 
             query = query.Replace("@user", username);
 

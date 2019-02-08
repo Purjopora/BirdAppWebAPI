@@ -8,6 +8,12 @@ namespace DemoRestService.Models
 {
     public class BirdSighting
     {
-        public string sightings  { get; set; }
+        public string username  { get; set; }
+        public string specie { get; set; }
+        public double longitudecoord { get; set; }
+        public double latitudecoord { get; set; }
+        public string comment { get; set; }
+        public DateTime timestamp { get; set; }
+
     }
 }
