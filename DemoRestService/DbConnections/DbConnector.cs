@@ -6,6 +6,8 @@ using System.Web;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Security.Cryptography;
+using DemoRestService.Algorithms;
+using DemoRestService.Common;
 
 namespace DemoRestService.DbConnections
 {
@@ -280,11 +282,8 @@ namespace DemoRestService.DbConnections
 
             return executeQuery(query);
         }
-        private void clearTable(string birdTableName)
-        {
 
-        }
-        public static bool updateSightingsTransaction()
+        public static bool updateSightings()
         {
             DateTime now = DateTime.Now;
             DataTable resultdt = DbConnector.GetSpeciesFromDB();
@@ -292,88 +291,68 @@ namespace DemoRestService.DbConnections
             {
                 return false;
             }
-
-            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            foreach (DataRow row in resultdt.Rows)
             {
-                connection.Open();
-                using (MySqlCommand command = connection.CreateCommand())
+                if(!(row["speciename"].ToString().Equals("Alli") || row["speciename"].ToString().Equals("Hiirihaukka")))
                 {
-                    MySqlTransaction transaction;
+                    continue;
+                }
+                String birdTableName = "testdb.bird" + row["speciename"].ToString();
+                birdTableName = birdTableName.Replace("-", "");
+                String clearQuery = "DELETE from " + birdTableName + ";";
+                executeNonQuery(clearQuery);
 
-                    transaction = connection.BeginTransaction();
-                    command.Connection = connection;
-                    command.Transaction = transaction;
-                    try
+
+                string sightingsQuery = "SELECT * FROM testdb.sightings WHERE specie = '@name';";
+                sightingsQuery = sightingsQuery.Replace("@name", row["speciename"].ToString());
+                DataTable birds = executeQuery(sightingsQuery);
+                if (birds == null)
+                {
+                    return false;
+                }
+                var freshBirds = new List<BirdSighting>();
+                foreach (DataRow birbRow in birds.Rows)
+                {
+                    DateTime time = Convert.ToDateTime(birbRow["timestamp"]);
+                    TimeSpan span = now.Subtract(time);
+                    double lon = Convert.ToDouble(birbRow["longitudecoord"]);
+                    double lat = Convert.ToDouble(birbRow["latitudecoord"]);
+                    if (span.CompareTo(TimeSpan.FromDays(FRESH_BIRD_TIMESPAN)) < 0)
                     {
-                        foreach (DataRow row in resultdt.Rows)
+                        var sighting = new BirdSighting
                         {
-                            String birdTableName = "testdb.bird" + row["speciename"].ToString();
-                            birdTableName = birdTableName.Replace("-", "");
-                            String clearQuery = "DELETE from " + birdTableName + ";";
-                            command.CommandText = clearQuery;
-                            command.ExecuteNonQuery();
-
-
-                            string sightingsQuery = "SELECT * FROM testdb.sightings WHERE specie = '@name'";
-                            sightingsQuery = sightingsQuery.Replace("@name", row["speciename"].ToString());
-                            DataTable birds = executeQuery(sightingsQuery);
-                            if (birds == null)
-                            {
-                                return false;
-                            }
-                            var freshBirds = new List<BirdSighting>();
-                            foreach (DataRow birbRow in birds.Rows)
-                            {
-                                DateTime time = Convert.ToDateTime(birbRow["timestamp"]);
-                                TimeSpan span = now.Subtract(time);
-                                double lon = Convert.ToDouble(birbRow["longitudecoord"]);
-                                double lat = Convert.ToDouble(birbRow["latitudecoord"]);
-                                if (span.CompareTo(TimeSpan.FromDays(FRESH_BIRD_TIMESPAN)) < 0)
-                                {
-                                    var sighting = new BirdSighting
-                                    {
-                                        username = "",
-                                        specie = row["speciename"].ToString(),
-                                        longitudecoord = lon,
-                                        latitudecoord = lat,
-                                        comment = "",
-                                        timestamp = now
-                                    };
-                                    freshBirds.Add(sighting);
-                                }
-                            }
-
-                            string insertQuery = "INSERT INTO " + birdTableName + " VALUES(@latitude, @longtitude);";
-                            command.CommandText = insertQuery;
-                            command.Parameters.Add("@latitude", MySqlDbType.Float);
-                            command.Parameters.Add("@longtitude", MySqlDbType.Float);
-                            foreach (BirdSighting bird in freshBirds)
-                            {
-                                command.Parameters["@latitude"].Value = bird.latitudecoord;
-                                command.Parameters["@longtitude"].Value = bird.longitudecoord;
-                                command.ExecuteNonQuery();
-                            }
-                        }
-                        transaction.Commit();
-                        return true;
-                    }
-                    catch (Exception e)
-                    {
-                        try
-                        {
-                            transaction.Rollback();
-                            return false;
-                        }
-                        catch (MySqlException ex)
-                        {
-                            return false;
-                        }
+                            username = "",
+                            specie = row["speciename"].ToString(),
+                            longitudecoord = lon,
+                            latitudecoord = lat,
+                            comment = "",
+                            timestamp = now
+                        };
+                        freshBirds.Add(sighting);
                     }
                 }
+                double[][] clusters = KekMeansLocationProviderAdapter.ClusterPartitions(freshBirds.ToList<LocationProvider>(), KekMeansLocationProviderAdapter.DEFAULT_CLUSTER_AMOUNT);
+                string insertQuery = "INSERT INTO " + birdTableName + " VALUES(@latitude, @longtitude);";
+                for (int i = 0; i < clusters.Length; i++)
+                {
+                    string insertCopy = String.Copy(insertQuery);
+                    insertCopy = insertCopy.Replace("@latitude", clusters[i][0].ToString());
+                    insertCopy = insertCopy.Replace("@longtitude", clusters[i][1].ToString());
+                    executeNonQuery(insertCopy);
+                }                        
+            }
+            return true;
+        }
+        private static void executeNonQuery(string query)
+        {
+            var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            using (MySqlCommand command = new MySqlCommand(query, connection))
+            {
+                    connection.Open();
+                    command.ExecuteNonQuery();
             }
         }
-
         private static DataTable executeQuery(string query)
         {
             var connectionString = String.Format("server={0};port={1};user id={2}; password={3}; database={4}; SslMode={5}", server, port, user, password, database, sslM);

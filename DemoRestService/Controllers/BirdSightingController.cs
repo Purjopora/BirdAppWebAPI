@@ -83,7 +83,7 @@ namespace DemoRestService.Controllers
         [Route("api/updateSightings")]
         public bool updateSightings()
         {
-            return DbConnector.updateSightingsTransaction();
+            return DbConnector.updateSightings();
         }
     }
 }
