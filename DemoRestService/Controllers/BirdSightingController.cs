@@ -17,7 +17,7 @@ namespace DemoRestService.Controllers
         [Route("api/SaveSighting")]
         public bool SaveSighting(BirdSighting birdsighting)
         {
-            
+
 
             return DbConnector.UpdateSightingsToDB(birdsighting);
 
@@ -56,9 +56,34 @@ namespace DemoRestService.Controllers
 
         }
 
+        [HttpGet]
+        [Route("api/GetSightings/Bird")]
+        public IEnumerable<BirdSighting> GetSightingsForBird(string bird)
+        {
+            DataTable resultdt = DbConnector.GetSightingsForBird(bird);
+            var SightingList = new List<BirdSighting>();
+            foreach (DataRow row in resultdt.Rows)
+            {
+                var sighting = new BirdSighting
+                {
+                    username = "",
+                    specie = "",
+                    longitudecoord = Double.Parse(row["longtitude"].ToString()),
+                    latitudecoord = Double.Parse(row["latitude"].ToString()),
+                    comment = "",
+                    timestamp = DateTime.Now
 
+                };
+                SightingList.Add(sighting);
+            }
+            return SightingList;
+        }
 
-
-
+        [HttpGet]
+        [Route("api/updateSightings")]
+        public bool updateSightings()
+        {
+            return DbConnector.updateSightingsTransaction();
+        }
     }
 }
