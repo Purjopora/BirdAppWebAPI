@@ -293,10 +293,6 @@ namespace DemoRestService.DbConnections
             }
             foreach (DataRow row in resultdt.Rows)
             {
-                if(!(row["speciename"].ToString().Equals("Alli") || row["speciename"].ToString().Equals("Hiirihaukka")))
-                {
-                    continue;
-                }
                 String birdTableName = "testdb.bird" + row["speciename"].ToString();
                 birdTableName = birdTableName.Replace("-", "");
                 String clearQuery = "DELETE from " + birdTableName + ";";
